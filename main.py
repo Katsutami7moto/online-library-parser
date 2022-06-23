@@ -2,6 +2,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from pathvalidate import sanitize_filename
 
 
 def check_for_redirect(response: requests.Response):
@@ -9,6 +10,32 @@ def check_for_redirect(response: requests.Response):
     if redirect:
         err_msg = 'There is no book with such ID.'
         raise requests.HTTPError(err_msg)
+
+
+def download_txt(url, file_name, folder='books/') -> str:
+    books_dir = Path(folder)
+    books_dir.mkdir(parents=True, exist_ok=True)
+    response = requests.get(url)
+    response.raise_for_status()
+    check_for_redirect(response)
+    file_name = f'{sanitize_filename(file_name)}.txt'
+    file_path = books_dir.joinpath(file_name)
+    with open(file_path, 'w') as file:
+        file.write(response.text)
+    return str(file_path)
+
+
+def sanitize_test():
+    url = 'http://tululu.org/txt.php?id=1'
+
+    filepath = download_txt(url, 'Алиби')
+    print(filepath)  # Выведется books/Алиби.txt
+
+    filepath = download_txt(url, 'Али/би', folder='books/')
+    print(filepath)  # Выведется books/Алиби.txt
+
+    filepath = download_txt(url, 'Али\\би', folder='txt/')
+    print(filepath)  # Выведется txt/Алиби.txt
 
 
 def download_books():
@@ -43,11 +70,11 @@ def get_books_title(book_id: int) -> str:
 
 
 def main():
-    try:
-        print(get_books_title(55555))
-    except requests.HTTPError as err:
-        print(err)
+    sanitize_test()
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except requests.HTTPError as err:
+        print(err)
