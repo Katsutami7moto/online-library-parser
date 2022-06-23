@@ -1,5 +1,5 @@
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit, unquote
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,6 +11,10 @@ def check_for_redirect(response: requests.Response, number: int):
     if redirect:
         err_msg = f'There is no book with ID {number}.'
         raise requests.HTTPError(err_msg)
+
+
+def get_file_name_from_url(url: str) -> str:
+    return Path(unquote(urlsplit(url).path)).name
 
 
 def get_books_title(book_id: int) -> tuple:
@@ -45,21 +49,28 @@ def download_txt(books_dir: Path, file_number: int) -> str:
     return str(file_path)
 
 
-def download_books_with_titles(folder: str = 'books'):
-    books_dir = Path(folder)
+def download_image(images_dir: Path, url: str):
+    response = requests.get(url)
+    response.raise_for_status()
+    file_path = images_dir.joinpath(get_file_name_from_url(url))
+    with open(file_path, 'wb') as file:
+        file.write(response.content)
+
+
+def download_books_with_titles():
+    books_dir = Path('books')
     books_dir.mkdir(parents=True, exist_ok=True)
+    images_dir = Path('images')
+    images_dir.mkdir(parents=True, exist_ok=True)
     for number in range(10):
         file_number = number + 1
         try:
             # download_txt(url, books_dir, file_number)
-            title, img_src = get_books_title(file_number)
-            if title and img_src:
-                print(f'Заголовок: {title}\n{img_src}')
+            title, img_url = get_books_title(file_number)
+            if img_url:
+                download_image(images_dir, img_url)
         except requests.HTTPError as err:
             print(err)
-        finally:
-            print()
-            continue
 
 
 def main():
