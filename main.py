@@ -27,9 +27,8 @@ def get_book_soup(book_id: int) -> BeautifulSoup:
 
 def get_image_url(book_soup: BeautifulSoup) -> str:
     base_url = 'https://tululu.org'
-    image_soup = book_soup.find('body').find('div',
-                                             class_='bookimage').find('img')
-    return urljoin(base_url, image_soup.get('src'))
+    image_soup = book_soup.find('body').find('div', class_='bookimage')
+    return urljoin(base_url, image_soup.find('img').get('src'))
 
 
 def get_book_title(book_soup: BeautifulSoup) -> tuple:
@@ -48,18 +47,28 @@ def get_book_comments(book_soup: BeautifulSoup) -> list:
     return comments
 
 
+def get_book_genres(book_soup: BeautifulSoup) -> list:
+    genres_soup = book_soup.find('body').find('span', class_='d_book')
+    genres = []
+    for genre in genres_soup.find_all('a'):
+        genres.append(genre.text)
+    return genres
+
+
 def parse_book_page(book_id: int) -> dict:
     try:
         book_soup = get_book_soup(book_id)
-        title, author = get_book_title(book_soup)
-        image_url = get_image_url(book_soup)
-        comments = get_book_comments(book_soup)
     except requests.HTTPError:
         pass
     else:
+        title, author = get_book_title(book_soup)
+        image_url = get_image_url(book_soup)
+        comments = get_book_comments(book_soup)
+        genres = get_book_genres(book_soup)
         parsed_book = {
             'title': title,
             'author': author,
+            'genres': genres,
             'image': image_url,
             'comments': comments,
         }
@@ -106,8 +115,9 @@ def main():
         parsed_book = parse_book_page(number + 1)
         if parsed_book:
             print(parsed_book['title'])
-            for comment in parsed_book['comments']:
-                print(comment)
+            # for comment in parsed_book['comments']:
+            #     print(comment)
+            print(parsed_book['genres'])
             print()
 
 
