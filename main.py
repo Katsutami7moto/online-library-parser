@@ -18,6 +18,8 @@ def get_file_name_from_url(url: str) -> str:
 
 def get_book_soup(book_id: int) -> BeautifulSoup:
     base_url = 'https://tululu.org'
+
+    # book_url has to end with '/', or else check_for_redirect() won't work
     book_url = urljoin(base_url, f'b{book_id}/')
     response = requests.get(book_url)
     response.raise_for_status()
@@ -28,7 +30,7 @@ def get_book_soup(book_id: int) -> BeautifulSoup:
 def get_image_url(book_soup: BeautifulSoup) -> str:
     base_url = 'https://tululu.org'
     image_soup = book_soup.find('body').find('div', class_='bookimage')
-    return urljoin(base_url, image_soup.find('img').get('src'))
+    return urljoin(base_url, image_soup.find('img')['src'])
 
 
 def get_book_title(book_soup: BeautifulSoup) -> tuple:
@@ -55,33 +57,28 @@ def get_book_genres(book_soup: BeautifulSoup) -> list:
     return genres
 
 
-def parse_book_page(book_id: int) -> dict:
-    try:
-        book_soup = get_book_soup(book_id)
-    except requests.HTTPError:
-        pass
-    else:
-        title, author = get_book_title(book_soup)
-        image_url = get_image_url(book_soup)
-        comments = get_book_comments(book_soup)
-        genres = get_book_genres(book_soup)
-        parsed_book = {
-            'title': title,
-            'author': author,
-            'genres': genres,
-            'image': image_url,
-            'comments': comments,
-        }
-        return parsed_book
+def parse_book_page(book_soup: BeautifulSoup) -> dict:
+    title, author = get_book_title(book_soup)
+    image_url = get_image_url(book_soup)
+    comments = get_book_comments(book_soup)
+    genres = get_book_genres(book_soup)
+    parsed_book = {
+        'title': title,
+        'author': author,
+        'genres': genres,
+        'image': image_url,
+        'comments': comments,
+    }
+    return parsed_book
 
 
-def download_txt(books_dir: Path, file_number: int, book_title: str) -> str:
-    url = 'https://tululu.org/txt.php'
-    payload = {'id': file_number}
-    response = requests.get(url, params=payload)
+def download_txt(books_dir: Path, book_id: int, book_title: str) -> str:
+    base_url = 'https://tululu.org/txt.php'
+    payload = {'id': book_id}
+    response = requests.get(base_url, params=payload)
     response.raise_for_status()
-    check_for_redirect(response, file_number)
-    file_name = f'{file_number}. {sanitize_filename(book_title)}.txt'
+    check_for_redirect(response, book_id)
+    file_name = f'{book_id}. {sanitize_filename(book_title)}.txt'
     file_path = books_dir.joinpath(file_name)
     with open(file_path, 'w') as file:
         file.write(response.text)
@@ -96,29 +93,20 @@ def download_image(images_dir: Path, url: str):
         file.write(response.content)
 
 
-def download_books_with_titles():
+def main():
     books_dir = Path('books')
     books_dir.mkdir(parents=True, exist_ok=True)
     images_dir = Path('images')
     images_dir.mkdir(parents=True, exist_ok=True)
     for number in range(10):
-        file_number = number + 1
+        book_id = number + 1
         try:
-            book_title = get_book_title(get_book_soup(file_number))[0]
-            download_txt(books_dir, file_number, book_title)
+            book_soup = get_book_soup(number + 1)
+            parsed_book = parse_book_page(book_soup)
+            download_txt(books_dir, book_id, parsed_book['title'])
+            download_image(images_dir, parsed_book['image'])
         except requests.HTTPError as err:
             print(err)
-
-
-def main():
-    for number in range(10):
-        parsed_book = parse_book_page(number + 1)
-        if parsed_book:
-            print(parsed_book['title'])
-            # for comment in parsed_book['comments']:
-            #     print(comment)
-            print(parsed_book['genres'])
-            print()
 
 
 if __name__ == '__main__':
