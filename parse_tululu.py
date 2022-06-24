@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit, unquote
 
@@ -93,20 +94,27 @@ def download_image(images_dir: Path, url: str):
         file.write(response.content)
 
 
-def main():
+def download_books_and_images(start: int, end: int):
     books_dir = Path('books')
     books_dir.mkdir(parents=True, exist_ok=True)
     images_dir = Path('images')
     images_dir.mkdir(parents=True, exist_ok=True)
-    for number in range(10):
-        book_id = number + 1
+    for book_id in range(start, end + 1):
         try:
-            book_soup = get_book_soup(number + 1)
+            book_soup = get_book_soup(book_id)
             parsed_book = parse_book_page(book_soup)
             download_txt(books_dir, book_id, parsed_book['title'])
             download_image(images_dir, parsed_book['image'])
         except requests.HTTPError as err:
             print(err)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--start_id', type=int, default=1)
+    parser.add_argument('-e', '--end_id', type=int, default=10)
+    args = parser.parse_args()
+    download_books_and_images(args.start_id, args.end_id)
 
 
 if __name__ == '__main__':
