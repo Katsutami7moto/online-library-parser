@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from time import sleep
 from urllib.parse import urljoin, urlsplit, unquote
 
 import requests
@@ -94,19 +95,32 @@ def download_books_and_images(start: int, end: int):
     images_dir = Path('images')
     images_dir.mkdir(parents=True, exist_ok=True)
     for book_id in range(start, end + 1):
-        try:
-            book_soup = get_book_soup(book_id)
-            parsed_book = parse_book_page(book_soup)
-            download_txt(books_dir, book_id, parsed_book['title'])
-            download_image(images_dir, parsed_book['image'])
-        except requests.HTTPError as err:
-            print(err)
+        first_reconnection = True
+        while True:
+            try:
+                book_soup = get_book_soup(book_id)
+                parsed_book = parse_book_page(book_soup)
+                download_txt(books_dir, book_id, parsed_book['title'])
+                download_image(images_dir, parsed_book['image'])
+                break
+            except requests.exceptions.ConnectionError as connect_err:
+                print(f'Connection failure: {connect_err}; book ID: {book_id}')
+                if first_reconnection:
+                    print('Retry in 5 seconds')
+                    sleep(5)
+                    first_reconnection = False
+                else:
+                    print('Retry in 15 seconds')
+                    sleep(15)
+            except requests.HTTPError as err:
+                print(err)
+                break
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--start_id', type=int, default=1)
-    parser.add_argument('-e', '--end_id', type=int, default=10)
+    parser.add_argument('-s', '--start_id', type=int, default=300)
+    parser.add_argument('-e', '--end_id', type=int, default=330)
     args = parser.parse_args()
     download_books_and_images(args.start_id, args.end_id)
 
