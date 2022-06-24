@@ -34,9 +34,9 @@ def get_image_url(book_soup: BeautifulSoup) -> str:
     return urljoin(base_url, image_soup.find('img')['src'])
 
 
-def get_book_title(book_soup: BeautifulSoup) -> tuple:
-    title_soup_text = book_soup.find('html').find('head').find('title').text
-    *title, author = title_soup_text.split(' - ')
+def get_book_title_and_author(book_soup: BeautifulSoup) -> tuple:
+    title_soup = book_soup.find('html').find('head').find('title')
+    *title, author = title_soup.text.split(' - ')
     title: str = ' '.join(title).strip()
     author: str = author.split(',')[0].strip()
     return title, author
@@ -59,7 +59,7 @@ def get_book_genres(book_soup: BeautifulSoup) -> list:
 
 
 def parse_book_page(book_soup: BeautifulSoup) -> dict:
-    title, author = get_book_title(book_soup)
+    title, author = get_book_title_and_author(book_soup)
     image_url = get_image_url(book_soup)
     comments = get_book_comments(book_soup)
     genres = get_book_genres(book_soup)
