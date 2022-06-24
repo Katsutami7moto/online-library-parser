@@ -30,9 +30,11 @@ def get_book_soup(book_id: int) -> BeautifulSoup:
 
 
 def get_image_url(book_soup: BeautifulSoup) -> str:
-    base_url = 'https://tululu.org'
-    image_soup = book_soup.find('body').find('div', class_='bookimage')
-    return urljoin(base_url, image_soup.find('img')['src'])
+    bookimage_soup = book_soup.find('div', class_='bookimage')
+    book_url = bookimage_soup.find('a')['href']
+    base_url = urljoin('https://tululu.org', book_url)
+    image_src = bookimage_soup.find('img')['src']
+    return urljoin(base_url, image_src)
 
 
 def get_book_title_and_author(book_soup: BeautifulSoup) -> tuple:
@@ -119,8 +121,8 @@ def download_books_and_images(start: int, end: int):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--start_id', type=int, default=300)
-    parser.add_argument('-e', '--end_id', type=int, default=330)
+    parser.add_argument('-s', '--start_id', type=int, default=1)
+    parser.add_argument('-e', '--end_id', type=int, default=10)
     args = parser.parse_args()
     download_books_and_images(args.start_id, args.end_id)
 
