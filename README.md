@@ -18,11 +18,11 @@ If the text file for a book is unavailable, the tool will continue downloading n
 
 You can run the tool in two ways:
 
-- without arguments, to download books by first 10 ids:
+- without command line arguments, to download books by first 10 ids:
 ```commandline
-python3 fetch_spacex_images.py
+python3 parse_tululu.py
 ```
-- with two command line arguments, to download books from `start_id` to `end_id` included:
+- with two command line arguments, to download books from `start_id` to `end_id`, inclusively:
 ```commandline
 python3 parse_tululu.py --start_id 20 --end_id 30
 ```
