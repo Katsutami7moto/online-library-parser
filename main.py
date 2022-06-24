@@ -7,9 +7,8 @@ from pathvalidate import sanitize_filename
 
 
 def check_for_redirect(response: requests.Response, number: int):
-    redirect = response.history
-    if redirect:
-        err_msg = f'There is no book with ID {number}.'
+    if response.history:
+        err_msg = f'There is no book with ID {number}'
         raise requests.HTTPError(err_msg)
 
 
@@ -17,31 +16,62 @@ def get_file_name_from_url(url: str) -> str:
     return Path(unquote(urlsplit(url).path)).name
 
 
-def get_books_title(book_id: int) -> tuple:
+def get_book_soup(book_id: int) -> BeautifulSoup:
     base_url = 'https://tululu.org'
-    book_url = urljoin(base_url, f'b{book_id}')
+    book_url = urljoin(base_url, f'b{book_id}/')
     response = requests.get(book_url)
     response.raise_for_status()
-    soup = BeautifulSoup(response.text, 'lxml')
-    title_soup_text = soup.find('html').find('head').find('title').text
-    if ' - ' not in title_soup_text:
-        return '', ''
+    check_for_redirect(response, book_id)
+    return BeautifulSoup(response.text, 'lxml')
+
+
+def get_image_url(book_soup: BeautifulSoup) -> str:
+    base_url = 'https://tululu.org'
+    image_soup = book_soup.find('body').find('div',
+                                             class_='bookimage').find('img')
+    return urljoin(base_url, image_soup.get('src'))
+
+
+def get_book_title(book_soup: BeautifulSoup) -> tuple:
+    title_soup_text = book_soup.find('html').find('head').find('title').text
     title, author = title_soup_text.split(' - ')
     title: str = title.strip()
-    # author: str = author.split(',')[0].strip()
-    image_soup = soup.find('body').find('div', class_='bookimage').find('img')
-    image_url = urljoin(base_url, image_soup.attrs['src'])
-    requests.get(image_url).raise_for_status()
-    return title, image_url
+    author: str = author.split(',')[0].strip()
+    return title, author
 
 
-def download_txt(books_dir: Path, file_number: int) -> str:
+def get_book_comments(book_soup: BeautifulSoup) -> list:
+    comments_soup = book_soup.find('body').find_all('div', class_='texts')
+    comments = []
+    for comment in comments_soup:
+        comments.append(comment.contents[-1].text)
+    return comments
+
+
+def parse_book_page(book_id: int) -> dict:
+    try:
+        book_soup = get_book_soup(book_id)
+        title, author = get_book_title(book_soup)
+        image_url = get_image_url(book_soup)
+        comments = get_book_comments(book_soup)
+    except requests.HTTPError:
+        pass
+    else:
+        parsed_book = {
+            'title': title,
+            'author': author,
+            'image': image_url,
+            'comments': comments,
+        }
+        return parsed_book
+
+
+def download_txt(books_dir: Path, file_number: int, book_title: str) -> str:
     url = 'https://tululu.org/txt.php'
     payload = {'id': file_number}
     response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response, file_number)
-    book_title: str = get_books_title(file_number)[0]
     file_name = f'{file_number}. {sanitize_filename(book_title)}.txt'
     file_path = books_dir.joinpath(file_name)
     with open(file_path, 'w') as file:
@@ -65,16 +95,20 @@ def download_books_with_titles():
     for number in range(10):
         file_number = number + 1
         try:
-            # download_txt(url, books_dir, file_number)
-            title, img_url = get_books_title(file_number)
-            if img_url:
-                download_image(images_dir, img_url)
+            book_title = get_book_title(get_book_soup(file_number))[0]
+            download_txt(books_dir, file_number, book_title)
         except requests.HTTPError as err:
             print(err)
 
 
 def main():
-    download_books_with_titles()
+    for number in range(10):
+        parsed_book = parse_book_page(number + 1)
+        if parsed_book:
+            print(parsed_book['title'])
+            for comment in parsed_book['comments']:
+                print(comment)
+            print()
 
 
 if __name__ == '__main__':
