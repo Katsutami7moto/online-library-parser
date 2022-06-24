@@ -36,8 +36,8 @@ def get_image_url(book_soup: BeautifulSoup) -> str:
 
 def get_book_title(book_soup: BeautifulSoup) -> tuple:
     title_soup_text = book_soup.find('html').find('head').find('title').text
-    title, author = title_soup_text.split(' - ')
-    title: str = title.strip()
+    *title, author = title_soup_text.split(' - ')
+    title: str = ' '.join(title).strip()
     author: str = author.split(',')[0].strip()
     return title, author
 
@@ -73,7 +73,7 @@ def parse_book_page(book_soup: BeautifulSoup) -> dict:
     return parsed_book
 
 
-def download_txt(books_dir: Path, book_id: int, book_title: str) -> str:
+def download_txt(books_dir: Path, book_id: int, book_title: str):
     base_url = 'https://tululu.org/txt.php'
     payload = {'id': book_id}
     response = requests.get(base_url, params=payload)
@@ -83,13 +83,13 @@ def download_txt(books_dir: Path, book_id: int, book_title: str) -> str:
     file_path = books_dir.joinpath(file_name)
     with open(file_path, 'w') as file:
         file.write(response.text)
-    return str(file_path)
 
 
 def download_image(images_dir: Path, url: str):
     response = requests.get(url)
     response.raise_for_status()
-    file_path = images_dir.joinpath(get_file_name_from_url(url))
+    file_name = sanitize_filename(get_file_name_from_url(url))
+    file_path = images_dir.joinpath(file_name)
     with open(file_path, 'wb') as file:
         file.write(response.content)
 
