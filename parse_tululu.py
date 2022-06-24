@@ -44,18 +44,12 @@ def get_book_title_and_author(book_soup: BeautifulSoup) -> tuple:
 
 def get_book_comments(book_soup: BeautifulSoup) -> list:
     comments_soup = book_soup.find('body').find_all('div', class_='texts')
-    comments = []
-    for comment in comments_soup:
-        comments.append(comment.contents[-1].text)
-    return comments
+    return [comment.contents[-1].text for comment in comments_soup]
 
 
 def get_book_genres(book_soup: BeautifulSoup) -> list:
     genres_soup = book_soup.find('body').find('span', class_='d_book')
-    genres = []
-    for genre in genres_soup.find_all('a'):
-        genres.append(genre.text)
-    return genres
+    return [genre.text for genre in genres_soup.find_all('a')]
 
 
 def parse_book_page(book_soup: BeautifulSoup) -> dict:
