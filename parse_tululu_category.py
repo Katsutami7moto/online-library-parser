@@ -16,9 +16,18 @@ def save_pretty_json(data):
         file.write(json.dumps(data, indent=4, ensure_ascii=False))
 
 
-def get_book_ids(genre_url: str, start_page: int, end_page: int) -> list:
+def get_final_page(genre_url: str) -> int:
+    response = requests.get(genre_url)
+    response.raise_for_status()
+    genre_soup = BeautifulSoup(response.text, 'lxml')
+    pages_links_soup = genre_soup.select('body p.center a.npage')
+    final_page = pages_links_soup[-1].text
+    return int(final_page)
+
+
+def get_book_ids(genre_url: str, pages: tuple) -> list:
     book_ids = []
-    for page in range(start_page, end_page + 1):
+    for page in range(*pages):
         page_url = f'{genre_url}{page}/'
         response = requests.get(page_url)
         response.raise_for_status()
@@ -31,7 +40,13 @@ def get_book_ids(genre_url: str, start_page: int, end_page: int) -> list:
 
 def main():
     sci_fi_url = 'https://tululu.org/l55/'
-    book_ids = get_book_ids(sci_fi_url, 1, 2)  # 45 книг
+    final_page = get_final_page(sci_fi_url)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--start_page', type=int)
+    parser.add_argument('-e', '--end_page', type=int, default=final_page)
+    args = parser.parse_args()
+    pages = args.start_page, args.end_page + 1
+    book_ids = get_book_ids(sci_fi_url, pages)
     downloaded_books_catalog = download_books_and_images(book_ids)
     save_pretty_json(downloaded_books_catalog)
 

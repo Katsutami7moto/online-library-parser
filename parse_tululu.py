@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
 
-def create_book_path(books_dir: Path, book_title: str) -> Path:
-    file_name = f'{sanitize_filename(book_title).strip(".")}.txt'
+def create_book_path(books_dir: Path, book_id, book_title: str) -> Path:
+    file_name = f'{book_id}. {sanitize_filename(book_title).strip(".")}.txt'
     return books_dir.joinpath(file_name)
 
 
@@ -108,7 +108,9 @@ def download_books_and_images(book_ids) -> list:
             try:
                 book_soup = get_book_soup(book_id)
                 parsed_book = parse_book_page(book_soup)
-                book_path = create_book_path(books_dir, parsed_book['title'])
+                book_path = create_book_path(
+                    books_dir, book_id, parsed_book['title']
+                )
                 image_url = get_image_url(book_soup)
                 image_path = create_image_path(images_dir, image_url)
 
