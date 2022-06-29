@@ -1,18 +1,18 @@
 import argparse
 import json
 from pathlib import Path
-from time import sleep
-from urllib.parse import urljoin, urlsplit, unquote
 
 import requests
 from bs4 import BeautifulSoup
-from pathvalidate import sanitize_filename
 
 from parse_tululu import download_books_and_images
 
 
-def save_pretty_json(data):
-    with open('downloaded_books.json', 'w', encoding='utf8') as file:
+def save_pretty_json(data, path: str):
+    json_path = Path(path)
+    json_path.mkdir(parents=True, exist_ok=True)
+    file_path = json_path.joinpath('books_catalog.json')
+    with open(file_path, 'w', encoding='utf8') as file:
         file.write(json.dumps(data, indent=4, ensure_ascii=False))
 
 
@@ -41,14 +41,22 @@ def get_book_ids(genre_url: str, pages: tuple) -> list:
 def main():
     sci_fi_url = 'https://tululu.org/l55/'
     final_page = get_final_page(sci_fi_url)
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--start_page', type=int)
-    parser.add_argument('-e', '--end_page', type=int, default=final_page)
+    parser.add_argument('--start_page', type=int, default=700)
+    parser.add_argument('--end_page', type=int, default=final_page)
+    parser.add_argument('--dest_folder', default='.')
+    parser.add_argument('--skip_txt', action='store_true')
+    parser.add_argument('--skip_img', action='store_true')
+    parser.add_argument('--json_path', default='.')
+
     args = parser.parse_args()
     pages = args.start_page, args.end_page + 1
     book_ids = get_book_ids(sci_fi_url, pages)
-    downloaded_books_catalog = download_books_and_images(book_ids)
-    save_pretty_json(downloaded_books_catalog)
+    downloaded_books_catalog = download_books_and_images(
+        book_ids, args.skip_txt, args.skip_img, args.dest_folder
+    )
+    save_pretty_json(downloaded_books_catalog, args.json_path)
 
 
 if __name__ == '__main__':

@@ -132,6 +132,6 @@ dmypy.json
 /.idea/
 
 # Project-specific
-downloaded_books.json
+books_catalog.json
 /books/
 /images/

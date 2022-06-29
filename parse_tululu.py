@@ -96,11 +96,14 @@ def download_image(image_path: Path, url: str):
         file.write(response.content)
 
 
-def download_books_and_images(book_ids) -> list:
-    books_dir = Path('books')
-    books_dir.mkdir(parents=True, exist_ok=True)
-    images_dir = Path('images')
-    images_dir.mkdir(parents=True, exist_ok=True)
+def download_books_and_images(book_ids, skip_txt, skip_img,
+                              dest_folder: str) -> list:
+    books_dir = Path(dest_folder).joinpath('books')
+    if not skip_txt:
+        books_dir.mkdir(parents=True, exist_ok=True)
+    images_dir = Path(dest_folder).joinpath('images')
+    if not skip_img:
+        images_dir.mkdir(parents=True, exist_ok=True)
     parsed_books = []
     for book_id in book_ids:
         first_reconnection = True
@@ -108,17 +111,20 @@ def download_books_and_images(book_ids) -> list:
             try:
                 book_soup = get_book_soup(book_id)
                 parsed_book = parse_book_page(book_soup)
-                book_path = create_book_path(
-                    books_dir, book_id, parsed_book['title']
-                )
-                image_url = get_image_url(book_soup)
-                image_path = create_image_path(images_dir, image_url)
 
-                download_txt(book_path, book_id)
-                download_image(image_path, image_url)
+                if not skip_txt:
+                    book_path = create_book_path(
+                        books_dir, book_id, parsed_book['title']
+                    )
+                    download_txt(book_path, book_id)
+                    parsed_book['book_path'] = str(book_path)
 
-                parsed_book['book_path'] = str(book_path)
-                parsed_book['image_path'] = str(image_path)
+                if not skip_img:
+                    image_url = get_image_url(book_soup)
+                    image_path = create_image_path(images_dir, image_url)
+                    download_image(image_path, image_url)
+                    parsed_book['image_path'] = str(image_path)
+
                 parsed_books.append(parsed_book)
                 break
             except requests.exceptions.ConnectionError as connect_err:
@@ -143,7 +149,7 @@ def main():
     parser.add_argument('-e', '--end_id', type=int, default=10)
     args = parser.parse_args()
     book_ids = range(args.start_id, args.end_id + 1)
-    download_books_and_images(book_ids)
+    download_books_and_images(book_ids, False, False, '.')
 
 
 if __name__ == '__main__':
