@@ -23,14 +23,15 @@ def get_book_ids(genre_url: str, start_page: int, end_page: int) -> list:
         response = requests.get(page_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'lxml')
-        for book in soup.find('body').find_all('table', class_='d_book'):
-            book_ids.append(book.find('a')['href'].strip('/b'))
+        for book in soup.select('body .d_book'):
+            book_id = book.select_one('a')['href'].strip('/b')
+            book_ids.append(book_id)
     return book_ids
 
 
 def main():
     sci_fi_url = 'https://tululu.org/l55/'
-    book_ids = get_book_ids(sci_fi_url, 1, 4)
+    book_ids = get_book_ids(sci_fi_url, 1, 2)  # 45 книг
     downloaded_books_catalog = download_books_and_images(book_ids)
     save_pretty_json(downloaded_books_catalog)
 

@@ -9,7 +9,7 @@ from pathvalidate import sanitize_filename
 
 
 def create_book_path(books_dir: Path, book_title: str) -> Path:
-    file_name = f'{sanitize_filename(book_title)}.txt'
+    file_name = f'{sanitize_filename(book_title).strip(".")}.txt'
     return books_dir.joinpath(file_name)
 
 
@@ -40,15 +40,14 @@ def get_book_soup(book_id) -> BeautifulSoup:
 
 
 def get_image_url(book_soup: BeautifulSoup) -> str:
-    bookimage_soup = book_soup.find('div', class_='bookimage')
-    book_url = bookimage_soup.find('a')['href']
+    book_url = book_soup.select_one('.bookimage a')['href']
     base_url = urljoin('https://tululu.org', book_url)
-    image_src = bookimage_soup.find('img')['src']
+    image_src = book_soup.select_one('.bookimage a img')['src']
     return urljoin(base_url, image_src)
 
 
 def get_book_title_and_author(book_soup: BeautifulSoup) -> tuple:
-    title_soup = book_soup.find('html').find('head').find('title')
+    title_soup = book_soup.select_one('html head title')
     *title, author = title_soup.text.split(' - ')
     title: str = ' '.join(title).strip()
     author: str = author.split(',')[0].strip()
@@ -56,13 +55,13 @@ def get_book_title_and_author(book_soup: BeautifulSoup) -> tuple:
 
 
 def get_book_comments(book_soup: BeautifulSoup) -> list:
-    comments_soup = book_soup.find('body').find_all('div', class_='texts')
+    comments_soup = book_soup.select('body .texts')
     return [comment.contents[-1].text for comment in comments_soup]
 
 
 def get_book_genres(book_soup: BeautifulSoup) -> list:
-    genres_soup = book_soup.find('body').find('span', class_='d_book')
-    return [genre.text for genre in genres_soup.find_all('a')]
+    genres_soup = book_soup.select('body span.d_book a')
+    return [genre.text for genre in genres_soup]
 
 
 def parse_book_page(book_soup: BeautifulSoup) -> dict:
