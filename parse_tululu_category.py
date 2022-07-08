@@ -1,6 +1,7 @@
 import argparse
 import json
 from pathlib import Path
+from time import sleep
 
 import requests
 from bs4 import BeautifulSoup
@@ -35,20 +36,34 @@ def get_final_page(genre_url: str) -> int:
 def get_book_ids(genre_url: str, pages: tuple) -> list:
     book_ids = []
     for page in range(*pages):
-        # page_url has to end with '/', or else check_for_redirect() won't work
-        page_url = f'{genre_url}{page}/'
-        response = requests.get(page_url)
-        response.raise_for_status()
-        try:
-            check_for_page_redirect(response, page)
-        except requests.HTTPError as err:
-            print(err)
-            continue
-        else:
-            soup = BeautifulSoup(response.text, 'lxml')
-            for book in soup.select('body .d_book'):
-                book_id = book.select_one('a')['href'].strip('/b')
-                book_ids.append(book_id)
+        first_reconnection = True
+        while True:
+            try:
+                # page_url has to end with '/',
+                # or else check_for_redirect() won't work
+                page_url = f'{genre_url}{page}/'
+                response = requests.get(page_url)
+                response.raise_for_status()
+                check_for_page_redirect(response, page)
+            except requests.exceptions.ConnectionError as connect_err:
+                print(f'Connection failure: {connect_err};')
+                print(f'Page {page}')
+                if first_reconnection:
+                    print('Retry in 5 seconds')
+                    sleep(5)
+                    first_reconnection = False
+                else:
+                    print('Retry in 15 seconds')
+                    sleep(15)
+            except requests.HTTPError as err:
+                print(err)
+                continue
+            else:
+                soup = BeautifulSoup(response.text, 'lxml')
+                for book in soup.select('body .d_book'):
+                    book_id = book.select_one('a')['href'].strip('/b')
+                    book_ids.append(book_id)
+                break
     return book_ids
 
 
