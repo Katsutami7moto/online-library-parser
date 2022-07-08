@@ -20,8 +20,9 @@ def get_final_page(genre_url: str) -> int:
     response = requests.get(genre_url)
     response.raise_for_status()
     genre_soup = BeautifulSoup(response.text, 'lxml')
-    pages_links_soup = genre_soup.select('body p.center a.npage')
-    final_page = pages_links_soup[-1].text
+    final_page = genre_soup.select_one(
+        'body p.center a.npage:last-of-type'
+    ).text
     return int(final_page)
 
 
