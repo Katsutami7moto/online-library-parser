@@ -18,7 +18,7 @@ def create_image_path(images_dir: Path, image_url: str) -> Path:
     return images_dir.joinpath(file_name)
 
 
-def check_for_redirect(response: requests.Response, book_id):
+def check_for_book_redirect(response: requests.Response, book_id):
     if response.history:
         err_msg = f'There is no book with ID {book_id}'
         raise requests.HTTPError(err_msg)
@@ -35,7 +35,7 @@ def get_book_soup(book_id) -> BeautifulSoup:
     book_url = urljoin(base_url, f'b{book_id}/')
     response = requests.get(book_url)
     response.raise_for_status()
-    check_for_redirect(response, book_id)
+    check_for_book_redirect(response, book_id)
     return BeautifulSoup(response.text, 'lxml')
 
 
@@ -84,8 +84,8 @@ def download_txt(book_path: Path, book_id):
     payload = {'id': book_id}
     response = requests.get(base_url, params=payload)
     response.raise_for_status()
-    check_for_redirect(response, book_id)
-    with open(book_path, 'w') as file:
+    check_for_book_redirect(response, book_id)
+    with open(book_path, 'w', encoding='utf-8') as file:
         file.write(response.text)
 
 

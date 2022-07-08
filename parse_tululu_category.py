@@ -8,6 +8,12 @@ from bs4 import BeautifulSoup
 from parse_tululu import download_books_and_images
 
 
+def check_for_page_redirect(response: requests.Response, page):
+    if response.history:
+        err_msg = f'There is no page {page}'
+        raise requests.HTTPError(err_msg)
+
+
 def save_pretty_json(data, path: str):
     json_path = Path(path)
     json_path.mkdir(parents=True, exist_ok=True)
@@ -29,13 +35,20 @@ def get_final_page(genre_url: str) -> int:
 def get_book_ids(genre_url: str, pages: tuple) -> list:
     book_ids = []
     for page in range(*pages):
+        # page_url has to end with '/', or else check_for_redirect() won't work
         page_url = f'{genre_url}{page}/'
         response = requests.get(page_url)
         response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'lxml')
-        for book in soup.select('body .d_book'):
-            book_id = book.select_one('a')['href'].strip('/b')
-            book_ids.append(book_id)
+        try:
+            check_for_page_redirect(response, page)
+        except requests.HTTPError as err:
+            print(err)
+            continue
+        else:
+            soup = BeautifulSoup(response.text, 'lxml')
+            for book in soup.select('body .d_book'):
+                book_id = book.select_one('a')['href'].strip('/b')
+                book_ids.append(book_id)
     return book_ids
 
 
