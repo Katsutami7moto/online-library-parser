@@ -125,8 +125,6 @@ def download_books_and_images(book_ids, skip_txt, skip_img,
                     download_image(image_path, image_url)
                     parsed_book['image_path'] = str(image_path)
 
-                parsed_books.append(parsed_book)
-                break
             except requests.exceptions.ConnectionError as connect_err:
                 print(f'Connection failure: {connect_err};')
                 print(f'book ID: {book_id}')
@@ -140,6 +138,12 @@ def download_books_and_images(book_ids, skip_txt, skip_img,
             except requests.HTTPError as err:
                 print(err)
                 break
+            else:
+                if not first_reconnection:
+                    print('Connection is restored.')
+                parsed_books.append(parsed_book)
+                break
+
     return parsed_books
 
 

@@ -59,6 +59,8 @@ def get_book_ids(genre_url: str, pages: tuple) -> list:
                 print(err)
                 continue
             else:
+                if not first_reconnection:
+                    print('Connection is restored.')
                 soup = BeautifulSoup(response.text, 'lxml')
                 for book in soup.select('body .d_book'):
                     book_id = book.select_one('a')['href'].strip('/b')
