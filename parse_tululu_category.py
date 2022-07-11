@@ -45,6 +45,8 @@ def get_book_ids(genre_url: str, pages: tuple) -> list:
                 response = requests.get(page_url)
                 response.raise_for_status()
                 check_for_page_redirect(response, page)
+                if not first_reconnection:
+                    print('Connection is restored.')
             except requests.exceptions.ConnectionError as connect_err:
                 print(f'Connection failure: {connect_err};')
                 print(f'Page {page}')
@@ -59,8 +61,6 @@ def get_book_ids(genre_url: str, pages: tuple) -> list:
                 print(err)
                 continue
             else:
-                if not first_reconnection:
-                    print('Connection is restored.')
                 soup = BeautifulSoup(response.text, 'lxml')
                 for book in soup.select('body .d_book'):
                     book_id = book.select_one('a')['href'].strip('/b')
