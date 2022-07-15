@@ -1,8 +1,8 @@
 import json
-from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from livereload import Server
 
 
 def get_books_catalog(path: str) -> list[dict]:
@@ -14,24 +14,25 @@ def get_books_catalog(path: str) -> list[dict]:
         return json.loads(json_str)
 
 
-def main():
+def on_reload():
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
-
     catalog = get_books_catalog('media')
-
     rendered_page = template.render(
         catalog=catalog
     )
-
     with open('index.html', 'w', encoding="utf8") as file:
         file.write(rendered_page)
 
-    server = HTTPServer(('0.0.0.0', 8000), SimpleHTTPRequestHandler)
-    server.serve_forever()
+
+def main():
+    on_reload()
+    server = Server()
+    server.watch('template.html', on_reload)
+    server.serve(root='.')
 
 
 if __name__ == "__main__":
