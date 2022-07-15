@@ -3,6 +3,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server
+from more_itertools import chunked
 
 
 def get_books_catalog(path: str) -> list[dict]:
@@ -20,7 +21,7 @@ def on_reload():
         autoescape=select_autoescape(['html', 'xml'])
     )
     template = env.get_template('template.html')
-    catalog = get_books_catalog('media')
+    catalog = list(chunked(get_books_catalog('media'), 2))
     rendered_page = template.render(
         catalog=catalog
     )
