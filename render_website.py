@@ -20,13 +20,19 @@ def on_reload():
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
+    pages_path = Path('pages')
+    pages_path.mkdir(parents=True, exist_ok=True)
     template = env.get_template('template.html')
     catalog = list(chunked(get_books_catalog('media'), 2))
-    rendered_page = template.render(
-        catalog=catalog
-    )
-    with open('index.html', 'w', encoding="utf8") as file:
-        file.write(rendered_page)
+    paged_catalog = list(chunked(catalog, 6))
+    for number, page in enumerate(paged_catalog, 1):
+        rendered_page = template.render(
+            catalog=page,
+            page_title=f'Собрание НФ-худлита, страница {number}'
+        )
+        file_path = pages_path.joinpath(f'index{number}.html')
+        with open(file_path, 'w', encoding="utf8") as file:
+            file.write(rendered_page)
 
 
 def main():

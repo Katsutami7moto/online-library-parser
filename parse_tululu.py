@@ -121,8 +121,8 @@ def handle_errors(func_, *args):
             break
 
 
-def handle_one_book_id(book_id: int, skip_txt: bool, skip_img: bool,
-                       books_dir: Path, images_dir: Path) -> dict:
+def get_parsed_book(book_id: int, skip_txt: bool, skip_img: bool,
+                    books_dir: Path, images_dir: Path) -> dict:
     book_soup = get_book_soup(book_id)
     parsed_book = parse_book_page(book_soup)
 
@@ -131,27 +131,15 @@ def handle_one_book_id(book_id: int, skip_txt: bool, skip_img: bool,
             books_dir, book_id, parsed_book['title']
         )
         download_txt(book_path, book_id)
-        parsed_book['book_path'] = str(book_path)
+        parsed_book['book_path'] = f'../{book_path}'
 
     if not skip_img:
         image_url = get_image_url(book_soup)
         image_path = create_image_path(images_dir, image_url)
         download_image(image_path, image_url)
-        parsed_book['image_path'] = str(image_path)
+        parsed_book['image_path'] = f'../{image_path}'
 
     return parsed_book
-
-
-def handle_one_book_id_and_errors(book_id: int, skip_txt: bool, skip_img: bool,
-                                  books_dir: Path, images_dir: Path) -> dict:
-    return handle_errors(
-        handle_one_book_id,
-        book_id,
-        skip_txt,
-        skip_img,
-        books_dir,
-        images_dir
-    )
 
 
 def download_books_and_images(book_ids, skip_txt, skip_img,
@@ -166,7 +154,8 @@ def download_books_and_images(book_ids, skip_txt, skip_img,
     parsed_books = []
     for book_id in book_ids:
         parsed_books.append(
-            handle_one_book_id_and_errors(
+            handle_errors(
+                get_parsed_book,
                 book_id,
                 skip_txt,
                 skip_img,
@@ -174,7 +163,7 @@ def download_books_and_images(book_ids, skip_txt, skip_img,
                 images_dir
             )
         )
-    return parsed_books
+    return list(filter(bool, parsed_books))
 
 
 def main():
