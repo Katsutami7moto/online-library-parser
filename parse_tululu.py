@@ -96,6 +96,64 @@ def download_image(image_path: str, url: str):
         file.write(response.content)
 
 
+def handle_errors(func_, *args):
+    first_reconnection = True
+    while True:
+        try:
+            response = func_(*args)
+
+            if not first_reconnection:
+                print('Connection is restored.')
+
+            return response
+
+        except requests.exceptions.ConnectionError as connect_err:
+            print(f'Connection failure: {connect_err};')
+            if first_reconnection:
+                print('Retry in 5 seconds')
+                sleep(5)
+                first_reconnection = False
+            else:
+                print('Retry in 15 seconds')
+                sleep(15)
+        except requests.HTTPError as err:
+            print(err)
+            break
+
+
+def handle_one_book_id(book_id: int, skip_txt: bool, skip_img: bool,
+                       books_dir: Path, images_dir: Path) -> dict:
+    book_soup = get_book_soup(book_id)
+    parsed_book = parse_book_page(book_soup)
+
+    if not skip_txt:
+        book_path = create_book_path(
+            books_dir, book_id, parsed_book['title']
+        )
+        download_txt(book_path, book_id)
+        parsed_book['book_path'] = str(book_path)
+
+    if not skip_img:
+        image_url = get_image_url(book_soup)
+        image_path = create_image_path(images_dir, image_url)
+        download_image(image_path, image_url)
+        parsed_book['image_path'] = str(image_path)
+
+    return parsed_book
+
+
+def handle_one_book_id_and_errors(book_id: int, skip_txt: bool, skip_img: bool,
+                                  books_dir: Path, images_dir: Path) -> dict:
+    return handle_errors(
+        handle_one_book_id,
+        book_id,
+        skip_txt,
+        skip_img,
+        books_dir,
+        images_dir
+    )
+
+
 def download_books_and_images(book_ids, skip_txt, skip_img,
                               dest_folder: str) -> list:
     books_dir = Path(dest_folder).joinpath('books')
@@ -104,47 +162,18 @@ def download_books_and_images(book_ids, skip_txt, skip_img,
     images_dir = Path(dest_folder).joinpath('images')
     if not skip_img:
         images_dir.mkdir(parents=True, exist_ok=True)
+
     parsed_books = []
     for book_id in book_ids:
-        first_reconnection = True
-        while True:
-            try:
-                book_soup = get_book_soup(book_id)
-                parsed_book = parse_book_page(book_soup)
-
-                if not skip_txt:
-                    book_path = create_book_path(
-                        books_dir, book_id, parsed_book['title']
-                    )
-                    download_txt(book_path, book_id)
-                    parsed_book['book_path'] = str(book_path)
-
-                if not skip_img:
-                    image_url = get_image_url(book_soup)
-                    image_path = create_image_path(images_dir, image_url)
-                    download_image(image_path, image_url)
-                    parsed_book['image_path'] = str(image_path)
-
-                if not first_reconnection:
-                    print('Connection is restored.')
-
-            except requests.exceptions.ConnectionError as connect_err:
-                print(f'Connection failure: {connect_err};')
-                print(f'book ID: {book_id}')
-                if first_reconnection:
-                    print('Retry in 5 seconds')
-                    sleep(5)
-                    first_reconnection = False
-                else:
-                    print('Retry in 15 seconds')
-                    sleep(15)
-            except requests.HTTPError as err:
-                print(err)
-                break
-            else:
-                parsed_books.append(parsed_book)
-                break
-
+        parsed_books.append(
+            handle_one_book_id_and_errors(
+                book_id,
+                skip_txt,
+                skip_img,
+                books_dir,
+                images_dir
+            )
+        )
     return parsed_books
 
 
