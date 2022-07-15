@@ -17,30 +17,29 @@
     <body>
         <div class="container">
             <div class="row">
-            {% for book_pair in catalog %}
-                {% for book in book_pair %}
-                    <div class="col">
-                        <div class="card mb-3" style="max-width: 540px;">
-                            <div class="row no-gutters">
-                                <div class="col-md-4">
-                                    <img class="card-img"
-                                         src="{{book.image_path|urlencode}}"
-                                         alt="{{book.title|e}}, читать, скачать txt, zip, jar">
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{book.title|e}}</h5>
-                                        <p class="card-text">{{book.author|e}}</p>
-                                        <p class="card-text"><small class="text-muted">Last updated 3
-                                            mins ago</small></p>
+                {% for book_pair in catalog %}
+                    {% for book in book_pair %}
+                        <div class="col">
+                            <div class="card mb-3" style="max-width: 540px;">
+                                <div class="row no-gutters">
+                                    <div class="col-md-4">
+                                        <img class="card-img"
+                                             src="{{book.image_path|urlencode}}"
+                                             alt="{{book.title|e}}, читать, скачать txt, zip, jar">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{book.title|e}}</h5>
+                                            <p class="card-text">{{book.author|e}}</p>
+                                            <p><a href="{{book.book_path|urlencode}}" target="_blank" rel="noopener noreferrer">Читать</a></p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    {% endfor %}
+                    <div class="w-100"></div>
                 {% endfor %}
-                <div class="w-100"></div>
-            {% endfor %}
             </div>
         </div>
 
