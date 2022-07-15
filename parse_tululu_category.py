@@ -69,6 +69,15 @@ def get_book_ids(genre_url: str, pages: tuple) -> list:
     return book_ids
 
 
+def download_genre_books(args: argparse.Namespace, genre_url: str):
+    pages = args.start_page, args.end_page + 1
+    book_ids = get_book_ids(genre_url, pages)
+    downloaded_books_catalog = download_books_and_images(
+        book_ids, args.skip_txt, args.skip_img, args.dest_folder
+    )
+    save_pretty_json(downloaded_books_catalog, args.json_path)
+
+
 def main():
     sci_fi_url = 'https://tululu.org/l55/'
     final_page = get_final_page(sci_fi_url)
@@ -76,18 +85,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start_page', type=int, default=700)
     parser.add_argument('--end_page', type=int, default=final_page)
-    parser.add_argument('--dest_folder', default='.')
+    parser.add_argument('--dest_folder', default='media')
     parser.add_argument('--skip_txt', action='store_true')
     parser.add_argument('--skip_img', action='store_true')
-    parser.add_argument('--json_path', default='.')
+    parser.add_argument('--json_path', default='media')
 
     args = parser.parse_args()
-    pages = args.start_page, args.end_page + 1
-    book_ids = get_book_ids(sci_fi_url, pages)
-    downloaded_books_catalog = download_books_and_images(
-        book_ids, args.skip_txt, args.skip_img, args.dest_folder
-    )
-    save_pretty_json(downloaded_books_catalog, args.json_path)
+    download_genre_books(args, sci_fi_url)
 
 
 if __name__ == '__main__':

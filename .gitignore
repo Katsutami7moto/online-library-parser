@@ -132,6 +132,5 @@ dmypy.json
 /.idea/
 
 # Project-specific
-books_catalog.json
-/books/
-/images/
+/media/
+index.html

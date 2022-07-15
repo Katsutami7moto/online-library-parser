@@ -8,14 +8,14 @@ from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
 
-def create_book_path(books_dir: Path, book_id, book_title: str) -> Path:
+def create_book_path(books_dir: Path, book_id, book_title: str) -> str:
     file_name = f'{book_id}. {sanitize_filename(book_title).strip(".")}.txt'
-    return books_dir.joinpath(file_name)
+    return books_dir.joinpath(file_name).as_posix()
 
 
-def create_image_path(images_dir: Path, image_url: str) -> Path:
+def create_image_path(images_dir: Path, image_url: str) -> str:
     file_name = sanitize_filename(get_file_name_from_url(image_url))
-    return images_dir.joinpath(file_name)
+    return images_dir.joinpath(file_name).as_posix()
 
 
 def check_for_book_redirect(response: requests.Response, book_id):
@@ -79,7 +79,7 @@ def parse_book_page(book_soup: BeautifulSoup) -> dict:
     return parsed_book
 
 
-def download_txt(book_path: Path, book_id):
+def download_txt(book_path: str, book_id):
     base_url = 'https://tululu.org/txt.php'
     payload = {'id': book_id}
     response = requests.get(base_url, params=payload)
@@ -89,7 +89,7 @@ def download_txt(book_path: Path, book_id):
         file.write(response.text)
 
 
-def download_image(image_path: Path, url: str):
+def download_image(image_path: str, url: str):
     response = requests.get(url)
     response.raise_for_status()
     with open(image_path, 'wb') as file:
