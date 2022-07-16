@@ -20,11 +20,40 @@
         <div class="mx-auto" style="width: 500px;">
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
-                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                    {% for page in pages %}
-                        <li class="page-item"><a class="page-link" href="#">{{page}}</a></li>
+
+                    {% if not previous_page %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Назад</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{previous_page|e}}">Назад</a>
+                        </li>
+                    {% endif %}
+
+                    {% for number, page_link in pages_links.items() %}
+
+                        {% if number == current_page_num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">
+                                    {{number|e}}
+                                    <span class="sr-only">(current)</span>
+                                </span>
+                            </li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{page_link|e}}">{{number|e}}</a></li>
+                        {% endif %}
+
                     {% endfor %}
-                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+
+                    {% if not next_page %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Вперёд</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="{{next_page|e}}">Вперёд</a></li>
+                    {% endif %}
+
                 </ul>
             </nav>
         </div>
