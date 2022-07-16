@@ -24,12 +24,14 @@ def on_reload():
     pages_path.mkdir(parents=True, exist_ok=True)
     template = env.get_template('template.html')
     paged_catalog = list(chunked(chunked(get_books_catalog('media'), 2), 6))
-    pages_links = {number: f'./index{number}.html'
-                   for number in range(1, len(paged_catalog) + 1)}
+    pages_num = len(paged_catalog)
+    pages_links: dict[int, str] = {
+        number: f'./index{number}.html'
+        for number in range(1, pages_num + 1)
+    }
     for number, page in enumerate(paged_catalog, 1):
-        previous_page = f'./index{number - 1}.html' if number > 1 else None
-        next_page = (f'./index{number + 1}.html'
-                     if number < len(paged_catalog) else None)
+        previous_page = pages_links[number - 1] if number > 1 else None
+        next_page = pages_links[number + 1] if number < pages_num else None
         page_title = f'Собрание НФ-худлита, страница {number}'
         rendered_page = template.render(
             current_page_num=number,
