@@ -46,7 +46,7 @@ python3 parse_tululu.py -s 20 -e 30
 
 This script has several optional arguments:
 
-- `--start_page` (default value is 700) and `--end_page` (default value is the 
+- `--start_page` (default value is 1) and `--end_page` (default value is the 
   last page) 
   define, what pages of 
   sci-fi category books

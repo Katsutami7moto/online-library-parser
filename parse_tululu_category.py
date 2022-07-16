@@ -70,7 +70,7 @@ def main():
     final_page = get_final_page(sci_fi_url)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start_page', type=int, default=700)
+    parser.add_argument('--start_page', type=int, default=1)
     parser.add_argument('--end_page', type=int, default=final_page)
     parser.add_argument('--dest_folder', default='media')
     parser.add_argument('--skip_txt', action='store_true')

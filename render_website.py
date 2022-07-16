@@ -23,7 +23,17 @@ def on_reload():
     pages_path = Path('pages')
     pages_path.mkdir(parents=True, exist_ok=True)
     template = env.get_template('template.html')
-    paged_catalog = list(chunked(chunked(get_books_catalog('media'), 2), 6))
+    book_cards_in_row = 2
+    rows_in_page = 6
+    paged_catalog = list(
+        chunked(
+            chunked(
+                get_books_catalog('media'),
+                book_cards_in_row
+            ),
+            rows_in_page
+        )
+    )
     pages_num = len(paged_catalog)
     pages_links: dict[int, str] = {
         number: f'./index{number}.html'

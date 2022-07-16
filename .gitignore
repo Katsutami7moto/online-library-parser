@@ -130,7 +130,3 @@ dmypy.json
 
 # JetBrains
 /.idea/
-
-# Project-specific
-/media/
-/pages/
