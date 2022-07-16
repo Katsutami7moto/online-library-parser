@@ -30,7 +30,7 @@ def on_reload():
             catalog=page,
             page_title=f'Собрание НФ-худлита, страница {number}'
         )
-        file_name = f'index{number if number != 1 else ""}.html'
+        file_name = f'index{number}.html'
         file_path = pages_path.joinpath(file_name)
         with open(file_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)
@@ -40,7 +40,7 @@ def main():
     on_reload()
     server = Server()
     server.watch('template.html', on_reload)
-    server.serve(root='.', default_filename='pages/index.html')
+    server.serve(root='.', default_filename='pages/index1.html')
 
 
 if __name__ == "__main__":
