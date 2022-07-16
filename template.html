@@ -15,10 +15,26 @@
         <title>{{page_title}}</title>
     </head>
     <body>
+
+        <!-- Pagination -->
+        <div class="mx-auto" style="width: 500px;">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                    {% for page in pages %}
+                        <li class="page-item"><a class="page-link" href="#">{{page}}</a></li>
+                    {% endfor %}
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Two columns for book cards -->
         <div class="container">
             <div class="row">
                 {% for book_pair in catalog %}
                     {% for book in book_pair %}
+                        <!-- A book card -->
                         <div class="col">
                             <div class="card mb-3" style="max-width: 540px;">
                                 <div class="row no-gutters">

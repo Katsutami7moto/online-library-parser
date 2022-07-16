@@ -25,13 +25,14 @@ def on_reload():
     template = env.get_template('template.html')
     catalog = list(chunked(get_books_catalog('media'), 2))
     paged_catalog = list(chunked(catalog, 6))
+    pages = list(range(1, len(paged_catalog) + 1))
     for number, page in enumerate(paged_catalog, 1):
         rendered_page = template.render(
             catalog=page,
-            page_title=f'Собрание НФ-худлита, страница {number}'
+            page_title=f'Собрание НФ-худлита, страница {number}',
+            pages=pages
         )
-        file_name = f'index{number}.html'
-        file_path = pages_path.joinpath(file_name)
+        file_path = pages_path.joinpath(f'index{number}.html')
         with open(file_path, 'w', encoding="utf8") as file:
             file.write(rendered_page)
 
