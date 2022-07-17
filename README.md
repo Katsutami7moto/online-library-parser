@@ -77,6 +77,11 @@ You can open the website [here](http://127.0.0.1:5500/) while it's local, or sto
 
 An example of the website is available [here](https://katsutami7moto.github.io/online-library-parser/pages/index1.html).
 
+It should look like this:
+
+![screenshot](https://user-images.githubusercontent.com/19842128/179379537-076f9a35-764c-47bf-92c3-fc5264044448.png)
+
+
 ## Project Goals
 
 The code is written for educational purposes on online-course for web-developers [dvmn.org](https://dvmn.org/).
