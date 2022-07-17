@@ -16,7 +16,7 @@ pip install -r requirements.txt
 This projects contains two scripts: `parse_tululu.py` and 
 `parse_tululu_category.py`.
 
-Both scripts download book texts in *.txt format and book covers as pictures (usually in *.jpg format), if a book has a cover. Texts are store in 'books' directory, covers - in 'images' directory; both directories will be created automatically.
+Both scripts download book texts in *.txt format and book covers as pictures (usually in *.jpg format), if a book has a cover. Texts are stored in `books` directory, covers - in `images` directory; both directories will be created automatically.
 
 If the text file for a book is unavailable, the tool will continue downloading next books; the cover for this book will also not be downloaded, even if there is one.
 
@@ -71,11 +71,11 @@ python3 parse_tululu_category.py --end_page 5
 ```commandline
 python3 render_website.py
 ```
-You can open the website [here](http://127.0.0.1:5500/) while it's local, or stop the script and open pages from `pages` directory. Press `Читать` button to open text filr of a book.
+You can open the website [here](http://127.0.0.1:5500/) while it's local, or stop the script and open pages from `pages` directory. Press `Читать` button to open text file of a book.
 
 ## GitHub Pages website
 
-An example of the webite is available [here](https://katsutami7moto.github.io/online-library-parser/pages/index1.html).
+An example of the website is available [here](https://katsutami7moto.github.io/online-library-parser/pages/index1.html).
 
 ## Project Goals
 
