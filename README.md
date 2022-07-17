@@ -63,11 +63,12 @@ python3 parse_tululu_category.py --start_page 238 --end_page 347 --json_path /ho
 
 ### Create website
 
-1. Download books from, e.g., first 5 pages with this command:
+1. Delete `media` and `pages` directories from downloaded repository.
+2. Download books from, e.g., first 5 pages with this command:
 ```commandline
 python3 parse_tululu_category.py --end_page 5
 ```
-2. Run this command to create pages of the website using information from `books_catalog.json` file:
+3. Run this command to create pages of the website using information from `books_catalog.json` file:
 ```commandline
 python3 render_website.py
 ```
