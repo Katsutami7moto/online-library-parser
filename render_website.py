@@ -11,8 +11,7 @@ def get_books_catalog(path: str) -> list:
     json_path.mkdir(parents=True, exist_ok=True)
     file_path = json_path.joinpath('books_catalog.json')
     with open(file_path, 'r', encoding='utf8') as file:
-        json_str = file.read()
-        return json.loads(json_str)
+        return json.load(file)
 
 
 def render_pages(paged_catalog: list, template: Template, pages_path: Path):
