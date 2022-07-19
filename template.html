@@ -10,7 +10,7 @@
         <link rel="stylesheet"
               href="../static/bootstrap.min.css">
 
-        <title>{{page_title}}</title>
+        <title>Собрание НФ-худлита, страница {{current_page_num}}</title>
         <link rel="icon" type="image/x-icon" href="../static/lg.png">
     </head>
     <body>
@@ -20,13 +20,13 @@
             <nav>
                 <ul class="pagination">
 
-                    {% if not previous_page %}
+                    {% if current_page_num <= 1 %}
                         <li class="page-item disabled">
                             <span class="page-link">Назад</span>
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="{{previous_page|e}}">Назад</a>
+                            <a class="page-link" href="{{pages_links[current_page_num - 1]|e}}">Назад</a>
                         </li>
                     {% endif %}
 
@@ -45,12 +45,12 @@
 
                     {% endfor %}
 
-                    {% if not next_page %}
+                    {% if current_page_num >= pages_links|length %}
                         <li class="page-item disabled">
                             <span class="page-link">Вперёд</span>
                         </li>
                     {% else %}
-                        <li class="page-item"><a class="page-link" href="{{next_page|e}}">Вперёд</a></li>
+                        <li class="page-item"><a class="page-link" href="{{pages_links[current_page_num + 1]|e}}">Вперёд</a></li>
                     {% endif %}
 
                 </ul>
