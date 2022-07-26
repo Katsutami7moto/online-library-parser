@@ -108,12 +108,14 @@ def handle_errors(func_, *args):
             return response
 
         except requests.exceptions.ConnectionError as connect_err:
-            print(f'Connection failure: {connect_err};')
             if first_reconnection:
+                print('Connection is down!')
+                print(connect_err)
                 print('Retry in 5 seconds')
                 sleep(5)
                 first_reconnection = False
             else:
+                print('Connection is still down!')
                 print('Retry in 15 seconds')
                 sleep(15)
         except requests.HTTPError as err:
