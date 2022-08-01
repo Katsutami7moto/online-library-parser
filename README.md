@@ -44,7 +44,7 @@ python3 parse_tululu.py -s 20 -e 30
 
 This script has several optional arguments:
 
-- `--start_page` (default value is 1) and `--end_page` (default value is the automatically detected numer of the last page) define, what pages of sci-fi category books will be downloaded from, inclusively:
+- `--start_page` (default value is 1) and `--end_page` (default value is the automatically detected number of the last page) define, what pages of sci-fi category books will be downloaded from, inclusively:
 ```commandline
 python3 parse_tululu_category.py --start_page 238 --end_page 347
 ```

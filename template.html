@@ -22,11 +22,15 @@
 
                     {% if current_page_num <= 1 %}
                         <li class="page-item disabled">
-                            <span class="page-link">Назад</span>
+                            <span class="page-link">
+                                Назад
+                            </span>
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="{{pages_links[current_page_num - 1]|e}}">Назад</a>
+                            <a class="page-link" href="{{pages_links[current_page_num - 1]|e}}">
+                                Назад
+                            </a>
                         </li>
                     {% endif %}
 
@@ -36,21 +40,33 @@
                             <li class="page-item active" aria-current="page">
                                 <span class="page-link">
                                     {{number|e}}
-                                    <span class="sr-only">(current)</span>
+                                    <span class="sr-only">
+                                        (current)
+                                    </span>
                                 </span>
                             </li>
                         {% else %}
-                            <li class="page-item"><a class="page-link" href="{{page_link|e}}">{{number|e}}</a></li>
+                            <li class="page-item">
+                                <a class="page-link" href="{{page_link|e}}">
+                                    {{number|e}}
+                                </a>
+                            </li>
                         {% endif %}
 
                     {% endfor %}
 
                     {% if current_page_num >= pages_links|length %}
                         <li class="page-item disabled">
-                            <span class="page-link">Вперёд</span>
+                            <span class="page-link">
+                                Вперёд
+                            </span>
                         </li>
                     {% else %}
-                        <li class="page-item"><a class="page-link" href="{{pages_links[current_page_num + 1]|e}}">Вперёд</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="{{pages_links[current_page_num + 1]|e}}">
+                                Вперёд
+                            </a>
+                        </li>
                     {% endif %}
 
                 </ul>
@@ -80,7 +96,12 @@
                                                     <span class="badge badge-light">{{genre|e}}</span>
                                                 {% endfor %}
                                             </p>
-                                            <p><a href="{{book.book_path|urlencode}}" target="_blank" rel="noopener noreferrer">Читать</a></p>
+                                            <p>
+                                                <a href="{{book.book_path|urlencode}}" 
+                                                   target="_blank" rel="noopener noreferrer">
+                                                    Читать
+                                                </a>
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
